@@ -11,15 +11,12 @@ import subprocess
 # the token creation page
 client = ovh.Client(
     endpoint='ovh-eu',               # Endpoint of API OVH Europe (List of available endpoints)
-    application_key='XXXXXXXXXX', # Application Key
-    application_secret='XXXXXXXXXX', # Application Secret
-    consumer_key="XXXXXXXXXX", # Consumer Key
+    application_key='XXXXXXXXXXX', # Application Key
+    application_secret='XXXXXXXXXXX', # Application Secret
+    consumer_key="XXXXXXXXXXX", # Consumer Key
 )
 
-domain_name = "XXXXXXXXXX" # Enter your OVH domain name here
-
-current_ip = ""
-
+domain_name = "XXXXXXXXXXX" # Enter your OVH domain name here
 
 def check_if_file_exist():
     try:
@@ -35,31 +32,32 @@ def get_value(val, dic):
              return value
     return "key doesn't exist"
 
-def get_dns_records():
+def get_dns_records(previous_ip):
     records_id = []
     records_info = []
     records_id = client.get("/domain/zone/" + domain_name + "/record/")
 
     for record in records_id:
-        result = client.get("/domain/zone/" + domaine_name + "/record/" + str(record))
-        if get_value("target", result) == current_ip:
+        result = client.get("/domain/zone/" + domain_name + "/record/" + str(record))
+        if get_value("target", result) == previous_ip:
             records_info.append(result)
-    # Pretty print
-    print (json.dumps(records_info, indent=4))
+    return (records_info)
 
 def update_dns(previous_ip, new_ip):
     print("previous", previous_ip)
     print("newip", new_ip)
+    # Pretty print
+    print (json.dumps(get_dns_records(previous_ip), indent=4))
 
 def check_ip_and_update():
     process = subprocess.Popen(["dig", "TXT", "+short", "o-o.myaddr.l.google.com", "@ns1.google.com"], stdout=subprocess.PIPE)
     output, error = process.communicate()
-    output = output[:-1]
+    output = output[1:-2]
     ext_ip = output.decode('ascii')
     check_if_file_exist()
     f = open("current_ip.txt", "r+")
     previous_ip = f.read()
-    if (previous_ip!= ext_ip):
+    if (previous_ip != ext_ip):
         f.close()
         f = open("current_ip.txt", "w")
         f.write(ext_ip)
