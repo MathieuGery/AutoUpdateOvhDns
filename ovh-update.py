@@ -11,23 +11,37 @@ import subprocess
 # the token creation page
 client = ovh.Client(
     endpoint='ovh-eu',               # Endpoint of API OVH Europe (List of available endpoints)
-    application_key='XXXXXXXXXXX',    # Application Key
-    application_secret='XXXXXXXXXXXXX',
-    consumer_key="XXXXXXXXXXXXX", # Application Secret    # Consumer Key
+    application_key='XXXXXXXXX', # Application Key
+    application_secret='XXXXXXXXX', # Application Secret
+    consumer_key="XXXXXXXXX", # Consumer Key
 )
 
+domain_name = "XXXXXXXXX" # Enter your OVH domain name here
+
 current_ip = ""
-records_id = []
-records_info = []
+
 
 def check_ip_and_update():
-    f = open("current_ip.txt", "w")
     process = subprocess.Popen(["dig", "TXT", "+short", "o-o.myaddr.l.google.com", "@ns1.google.com"], stdout=subprocess.PIPE)
     output, error = process.communicate()
     output = output[:-1]
     ext_ip = output.decode('ascii')
-    f.write(ext_ip)
-    f.close()
+    check_if_file_exist()
+    f = open("current_ip.txt", "r+")
+    if (f.read() != ext_ip):
+        f.close()
+        f = open("current_ip.txt", "w")
+        f.write(ext_ip)
+        f.close()
+    else:
+        print("Nothing to do")
+
+def check_if_file_exist():
+    try:
+        f = open("current_ip.txt", "r+")
+    except:
+        f = open("current_ip.txt", "w+")
+        f.close()
 
 def get_value(val, dic):
     for key, value in dic.items():
@@ -37,11 +51,13 @@ def get_value(val, dic):
 
 
 def get_dns_records():
-    records_id = client.get('/domain/zone/gideon.ovh/record/')
+    records_id = []
+    records_info = []
+    records_id = client.get("/domain/zone/" + domain_name + "/record/")
 
     for record in records_id:
-        result = client.get('/domain/zone/gideon.ovh/record/' + str(record))
-        if get_value('target', result) == current_ip:
+        result = client.get("/domain/zone/" + domaine_name + "/record/" + str(record))
+        if get_value("target", result) == current_ip:
             records_info.append(result)
     # Pretty print
     print (json.dumps(records_info, indent=4))
