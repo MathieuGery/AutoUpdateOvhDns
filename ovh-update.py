@@ -11,34 +11,20 @@ import subprocess
 # the token creation page
 client = ovh.Client(
     endpoint='ovh-eu',               # Endpoint of API OVH Europe (List of available endpoints)
-    application_key='XXXXXXXXX', # Application Key
-    application_secret='XXXXXXXXX', # Application Secret
-    consumer_key="XXXXXXXXX", # Consumer Key
+    application_key='XXXXXXXXXX', # Application Key
+    application_secret='XXXXXXXXXX', # Application Secret
+    consumer_key="XXXXXXXXXX", # Consumer Key
 )
 
-domain_name = "XXXXXXXXX" # Enter your OVH domain name here
+domain_name = "XXXXXXXXXX" # Enter your OVH domain name here
 
 current_ip = ""
 
 
-def check_ip_and_update():
-    process = subprocess.Popen(["dig", "TXT", "+short", "o-o.myaddr.l.google.com", "@ns1.google.com"], stdout=subprocess.PIPE)
-    output, error = process.communicate()
-    output = output[:-1]
-    ext_ip = output.decode('ascii')
-    check_if_file_exist()
-    f = open("current_ip.txt", "r+")
-    if (f.read() != ext_ip):
-        f.close()
-        f = open("current_ip.txt", "w")
-        f.write(ext_ip)
-        f.close()
-    else:
-        print("Nothing to do")
-
 def check_if_file_exist():
     try:
-        f = open("current_ip.txt", "r+")
+        f = open("current_ip.txt", "r")
+        f.close()
     except:
         f = open("current_ip.txt", "w+")
         f.close()
@@ -48,7 +34,6 @@ def get_value(val, dic):
         if val == key:
              return value
     return "key doesn't exist"
-
 
 def get_dns_records():
     records_id = []
@@ -61,5 +46,26 @@ def get_dns_records():
             records_info.append(result)
     # Pretty print
     print (json.dumps(records_info, indent=4))
+
+def update_dns(previous_ip, new_ip):
+    print("previous", previous_ip)
+    print("newip", new_ip)
+
+def check_ip_and_update():
+    process = subprocess.Popen(["dig", "TXT", "+short", "o-o.myaddr.l.google.com", "@ns1.google.com"], stdout=subprocess.PIPE)
+    output, error = process.communicate()
+    output = output[:-1]
+    ext_ip = output.decode('ascii')
+    check_if_file_exist()
+    f = open("current_ip.txt", "r+")
+    previous_ip = f.read()
+    if (previous_ip!= ext_ip):
+        f.close()
+        f = open("current_ip.txt", "w")
+        f.write(ext_ip)
+        f.close()
+        update_dns(previous_ip, ext_ip)
+    else:
+        print("Nothing to do")
 
 check_ip_and_update()
