@@ -11,12 +11,12 @@ import subprocess
 # the token creation page
 client = ovh.Client(
     endpoint='ovh-eu',               # Endpoint of API OVH Europe (List of available endpoints)
-    application_key='XXXXXXXXXXX', # Application Key
-    application_secret='XXXXXXXXXXX', # Application Secret
-    consumer_key="XXXXXXXXXXX", # Consumer Key
+    application_key='XXXXXXXXXX', # Application Key
+    application_secret='XXXXXXXXXX', # Application Secret
+    consumer_key="XXXXXXXXXX", # Consumer Key
 )
 
-domain_name = "XXXXXXXXXXX" # Enter your OVH domain name here
+domain_name = "XXXXXXXXXX" # Enter your OVH domain name here
 
 def check_if_file_exist():
     try:
@@ -48,6 +48,10 @@ def update_dns(previous_ip, new_ip):
     print("newip", new_ip)
     # Pretty print
     print (json.dumps(get_dns_records(previous_ip), indent=4))
+    dns_records = get_dns_records(previous_ip)
+    print(dns_records[1]["id"])
+    for record in dns_records:
+        print(record["id"])
 
 def check_ip_and_update():
     process = subprocess.Popen(["dig", "TXT", "+short", "o-o.myaddr.l.google.com", "@ns1.google.com"], stdout=subprocess.PIPE)
